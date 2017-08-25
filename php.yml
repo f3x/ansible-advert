@@ -1,0 +1,9 @@
+# file: php.yml
+---
+ - hosts: all
+   become: yes
+   become_user: root
+
+   roles:
+     - { role: php, tags: ['php'] }
+

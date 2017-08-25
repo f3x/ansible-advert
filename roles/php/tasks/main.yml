@@ -1,0 +1,36 @@
+# file: roles/php/tasks/main.yml
+---
+- name: Add Wheezy repo for PHP 5.4
+  apt_repository:
+    repo: deb http://ftp.us.debian.org/debian/ wheezy main contrib non-free
+    state: present
+
+- name: Add Wheezy src repo for PHP 5.4
+  apt_repository:
+    repo: deb-src http://ftp.us.debian.org/debian/ wheezy main contrib non-free
+    state: present
+
+- name: Install PHP5 the version '5.5.45' 
+  apt:
+    name: php5=5.4.45-0+deb7u2
+    state: present
+    update_cache: yes
+
+- name: Install PHP5-common the version '5.5.45'
+  apt:
+    name: php5-common=5.4.45-0+deb7u2
+    state: present
+    update_cache: yes
+
+- name: Install PHP5-cli the version '5.5.45'
+  apt:
+    name: php5-cli=5.4.45-0+deb7u2
+    state: present
+    update_cache: yes
+
+- name: Install libapache2-mod-php5 the version '5.5.45'
+  apt:
+    name: libapache2-mod-php5=5.4.45-0+deb7u2
+    state: present
+    update_cache: yes
+

@@ -1,0 +1,9 @@
+# file: webservers.yml
+---
+ - hosts: all
+   become: yes
+   become_user: root
+
+   roles:
+     - { role: apache2, tags: ['apache2'] }
+

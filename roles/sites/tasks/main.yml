@@ -1,0 +1,38 @@
+# file: roles/sites/tasks/main.yml
+---
+- name: Add advert user
+  user:
+    name: advert
+    group: www
+    password: advert_z0
+
+- name: Add advert drago
+  user:
+    name: drago
+    group: www
+    password: drago_z0
+
+- name: Restore database
+  mysql_db:
+    name: all
+    state: import
+    target: /root/backups/dbdump_Fri.sql
+  tags:
+    - deploy
+
+
+- name: Unpasck sites sources
+  unarchive:
+    src: /root/backups/sites_Fri.tgz 
+    dest: /
+    remote_src: yes
+
+- name: copy configs to apache2 conf.d, and restart it
+  copy:
+    src: "{{ item }}"
+    dest: /etc/apache2/sites-enabled/
+  with_fileglob:
+       - "{{role_path}}/files/*.conf"
+
+- name: restart apache2 
+  service: name=apache2 state=restarted

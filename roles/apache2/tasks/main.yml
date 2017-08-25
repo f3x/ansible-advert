@@ -1,0 +1,77 @@
+# file: roles/apache2/tasks/main.yml
+---
+- name: install apache module and restart apache
+  apt: update_cache=yes cache_valid_time=3600 pkg={{ item }} state=present # won't update if done under an hour ago
+  with_items:
+    - apache2-threaded-dev
+    - libapache2-mod-rpaf
+    - libapache2-mod-macro 
+    - libapache2-mod-php5
+  notify:
+    - restart apache2
+
+- name: enable apache2 moduels
+  apache2_module: name={{item}} state=present
+  with_items:
+       - include
+       - macro
+       - rewrite
+       - rpaf
+  notify:
+    - restart apache2
+
+- name: fix rpaf nameing (-2.0.so -> .so)
+  lineinfile: dest=/etc/apache2/mods-enabled/rpaf.load regexp="^LoadModule" line="LoadModule rpaf_module /usr/lib/apache2/modules/mod_rpaf.so" state=present
+
+- name: add backend record to /etc/hosts
+  lineinfile: dest=/etc/hosts regexp="backend" line="{{inventory_hostname}} backend" state=present
+
+- name: apache2 set ServerName value
+  lineinfile: dest=/etc/apache2/ports.conf regexp="^ServerName" line="ServerName localhost" state=present
+  notify:
+    - restart apache2
+
+- name: apache2 set NameVirtualHost value
+  lineinfile: dest=/etc/apache2/ports.conf regexp="^NameVirtualHost" line="NameVirtualHost backend:80" state=present
+  notify:
+    - restart apache2
+
+- name: install php5 and modules and restart apache
+  apt: update_cache=yes cache_valid_time=3600 pkg={{ item }} state=present # won't update if done under an hour ago
+  with_items:
+    - php5-imagick
+    - php5-cli
+    - php5-common
+    - php5-curl
+    - php5-dev
+    - php5-gd
+    - php5-intl
+    - php5-xsl
+  notify:
+    - restart apache2
+
+
+#TODO: in PHP role, with version variables in templates
+- name: Download and unarchive PHP IONCUBE
+  unarchive:
+    src: https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz 
+    dest: /tmp
+    remote_src: yes
+
+- name: copy configs to apache2 conf.d
+  copy:
+    src: "{{ item }}"
+    dest: /usr/lib/php5/20100525/
+    remote_src: yes
+  with_items:
+       - /tmp/ioncube/ioncube_loader_lin_5.4.so
+       - /tmp/ioncube/ioncube_loader_lin_5.4_ts.so
+
+- name: add ioncube to php conf.d
+  lineinfile:
+    path: /etc/php5/conf.d/00-ioncube.ini
+    line: 'zend_extension = "/usr/lib/php5/20100525/ioncube_loader_lin_5.4.so"'
+    create: yes
+  notify:
+    - restart apache2
+

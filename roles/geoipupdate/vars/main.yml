@@ -1,0 +1,5 @@
+# file: /roles/geoipupdate/vars:main.yml
+---
+userid: 37871
+licensekey: iZHYHfAc85Fl
+productids: 106 GeoIP2-Country

@@ -1,0 +1,46 @@
+# file: roles/geoipupdate/tasks/main.yml
+---
+#downloading
+- name: Download and unarchive GEOIPUPDATE sources
+  unarchive:
+    src: "{{role_path}}/files/geoipupdate-2.0.2.tgz"
+    dest: /tmp
+    remote_src: no
+
+#compilaton
+#configure
+- name: Running ./configure for GEOIPUPDATE sources
+  command: chdir=/tmp/geoipupdate-2.0.2 {{ item }}
+  with_items:
+    - ./configure --prefix=/usr --sysconfdir=/etc
+
+#make
+- name: make for GEOIPUPDATE sources
+  make:
+    chdir: /tmp/geoipupdate-2.0.2
+
+#make install
+- name: make install for GEOIPUPDATE sources
+  make:
+    chdir: /tmp/geoipupdate-2.0.2
+    target: install
+
+#place config file
+- name: Add GEOIPUPDATE config
+  template: src=geoip.conf.j2 dest=/etc/GeoIP.conf
+
+#create geioip database catalog
+- name: Creates GEOIP directory for geodatabases
+  file: path=/usr/share/GeoIP state=directory
+
+#updatee databases
+- name: Update GEOIP databases
+  command: /usr/bin/geoipupdate
+
+#create cront job - update geoipdatabases
+- name: Add geip databases updating in cron
+  cron:
+    name: "update geoip databases"
+    minute: "0"
+    hour: "5,2"
+    job: /usr/bin/geoipupdate

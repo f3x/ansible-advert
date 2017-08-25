@@ -1,0 +1,34 @@
+# file: roles/mysql/tasks/main.yml
+---
+- name: 1. Install Mysql server
+  apt: name=mysql-server state=present
+
+- name: 2. Start Mysql Service
+  service: name=mysql state=started enabled=true
+
+- name: 3. Install python Mysql package #required for mysql_db tasks
+  apt: name=python-mysqldb state=present
+
+- name: 4. Drop a database user admin on localhost
+  mysql_user: name=admin host_all=yes state=absent
+  tags:
+    - without_mysql_drop
+
+- name: 4.1 Drop a database user admin on *
+  mysql_user: name=admin host=* state=absent
+  tags:
+    - without_mysql_drop
+
+- name: 5. Create a database user admin on localhost
+  mysql_user: name=admin password=admin_z0 priv=*.*:ALL host=localhost state=present
+  tags:
+    - without_mysql_add
+
+- name: 5.1 Create a database user admin for *
+  mysql_user: name=admin password=admin_z0 priv=*.*:ALL host=* state=present
+  tags:
+    - without_mysql_add
+
+- name: 6. Install MySQL extension for PHP
+  apt: name=php5-mysql state=present
+  notify: restart apache2

@@ -1,0 +1,34 @@
+# file: roles/libmaxminddb/tasks/main.yml
+---
+#downloading
+- name: Download and unarchive LIBMAXMINDDB sources
+  unarchive:
+    src: "{{role_path}}/files/libmaxminddb.tgz"
+    dest: /tmp
+    remote_src: no
+
+#compilaton
+#configure
+- name: Running ./configure for libmaxminddb sources
+  command: chdir=/tmp/libmaxminddb {{ item }}
+  with_items:
+    - ./configure
+
+#make
+- name: make for libmaxminddb sources
+  make:
+    chdir: /tmp/libmaxminddb
+
+#make install
+- name: make install for libmaxminddb sources
+  make:
+    chdir: /tmp/libmaxminddb
+    target: install
+
+#add path to ldconfig
+- name: add ldconfig path
+  shell: "echo /usr/local/lib  >> /etc/ld.so.conf.d/local.conf"
+
+#run ldconfig
+- name: run ldconfig
+  command: ldconfig

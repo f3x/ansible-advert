@@ -1,0 +1,9 @@
+# file: dbservers.yml
+---
+ - hosts: all
+   become: yes
+   become_user: root
+
+   roles:
+     - { role: mysql, tags: ['mysql'] }
+

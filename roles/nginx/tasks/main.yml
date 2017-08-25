@@ -1,0 +1,42 @@
+# file: roles/nginx/tasks/main.yml
+---
+#downloading modules
+- name: get ngx_http_geoip2_module
+  git:
+    repo: https://github.com/leev/ngx_http_geoip2_module.git
+    dest: /tmp/ngx_http_geoip2_module
+
+#downloading
+- name: Download and unarchive Nginx sources
+  unarchive:
+    src: http://nginx.org/download/nginx-{{nginx_version}}.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+#compilaton
+- name: Running ./configure for NGINX sources
+  command: chdir=/tmp/nginx-{{nginx_version}} {{ item }}
+  with_items:
+    - ./configure  --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --add-module=/tmp/ngx_http_geoip2_module
+
+#make 
+- name: make for NGINX sources
+  make:
+    chdir: /tmp/nginx-{{nginx_version}}
+
+#make install
+- name: make install for NGINX sources
+  make:
+    chdir: /tmp/nginx-{{nginx_version}}
+    target: install
+
+#symbolic link
+- name: Make symbolik link on NGINX config
+  file: 
+    src: /usr/local/nginx/conf
+    dest: /etc/nginx
+    state: link
+
+#remove defaults from nginx config dir
+- name: Remove all .defaults from NGINX config
+  shell: rm -rf /etc/nginx/*.default
