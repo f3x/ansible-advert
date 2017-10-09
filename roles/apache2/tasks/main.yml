@@ -47,6 +47,7 @@
     - php5-gd
     - php5-intl
     - php5-xsl
+    - php5-memcache
   notify:
     - restart apache2
 

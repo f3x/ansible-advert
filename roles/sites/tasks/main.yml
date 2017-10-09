@@ -16,14 +16,14 @@
   mysql_db:
     name: all
     state: import
-    target: /root/backups/dbdump_Fri.sql
+    target: /root/backups/dbdump_Mon.sql
   tags:
     - deploy
 
 
 - name: Unpasck sites sources
   unarchive:
-    src: /root/backups/sites_Fri.tgz 
+    src: /root/backups/sites_Mon.tgz 
     dest: /
     remote_src: yes
 
